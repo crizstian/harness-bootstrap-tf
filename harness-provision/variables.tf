@@ -17,7 +17,7 @@ locals {
     connection_type = details.connection_type
     url             = details.url
     validation_repo = details.connection_type == "Repo" ? "" : details.validation_repo
-    org_id          = details.connection_type == "Repo" ? module.bootstrap_harness_account.organization[var.organization_prefix].org_id : try(details.org_id, "")
+    org_id          = details.connection_type == "Repo" ? module.bootstrap_harness_account.organization[var.organization_prefix].org_id : try(details.enable_org_connector, false) == true ? module.bootstrap_harness_account.organization[var.organization_prefix].org_id : ""
     project_id      = details.connection_type == "Repo" ? module.bootstrap_harness_account.organization[var.organization_prefix].seed_project_id : try(details.project_id, "")
     credentials = {
       http = {
