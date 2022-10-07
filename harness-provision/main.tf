@@ -1,6 +1,7 @@
 # Create Organizations
 module "bootstrap_harness_account" {
   source                         = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-project?ref=main"
+  suffix                         = random_string.suffix.id
   harness_platform_organizations = var.harness_platform_organizations
 
   providers = {
@@ -8,6 +9,7 @@ module "bootstrap_harness_account" {
   }
 }
 
+# Create Delegates and downloads the manifest (run locally only); manifests are not exported or upload to an artifact repository
 module "bootstrap_harness_delegates" {
   depends_on = [
     module.bootstrap_harness_account,
@@ -18,11 +20,13 @@ module "bootstrap_harness_delegates" {
   harness_account_id         = var.harness_platform_account_id
 }
 
+# Create connectors
 module "bootstrap_harness_connectors" {
   depends_on = [
     module.bootstrap_harness_account,
   ]
   source                             = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-connectors?ref=main"
+  suffix                             = random_string.suffix.id
   harness_platform_github_connectors = local.github_connectors
 
   providers = {
@@ -30,10 +34,13 @@ module "bootstrap_harness_connectors" {
   }
 }
 
-output "account" {
-  value = {
-    organizations = module.bootstrap_harness_account.organization
-    delegates     = module.bootstrap_harness_delegates.delegates
-    connectors    = module.bootstrap_harness_connectors.connectors
-  }
+output "organizations" {
+  value = module.bootstrap_harness_account.organization
 }
+output "delegates" {
+  value = module.bootstrap_harness_delegates.delegates
+}
+output "connectors" {
+  value = module.bootstrap_harness_connectors.connectors
+}
+

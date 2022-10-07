@@ -6,3 +6,8 @@ contrib/examples/vars.tf
 contrib/manifests/*.yml
 harness-provision/*.yml
 *.json
+.DS_Store
+contrib/scripts/start
+contrib/scripts/plan
+contrib/scripts/apply
+contrib/scripts/destroy

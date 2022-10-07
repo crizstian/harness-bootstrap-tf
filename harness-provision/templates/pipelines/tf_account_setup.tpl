@@ -1,8 +1,8 @@
 pipeline:
-  name: TF Account Setup
-  identifier: TF_Account_Setup
-  projectIdentifier: cristian_lab_devsecops_org_ifJl
-  orgIdentifier: cristian_lab_devsecops_org_ifJl
+  name: ${name}
+  identifier: ${name}_${suffix}
+  projectIdentifier: ${project_id}
+  orgIdentifier: ${org_id}
   tags: {}
   stages:
     - stage:
@@ -30,7 +30,7 @@ pipeline:
                                 type: Github
                                 spec:
                                   gitFetchType: Branch
-                                  connectorRef: <+stage.variables.harness_git_connector>
+                                  connectorRef: ${git_connector_ref}
                                   branch: <+stage.variables.tf_branch>
                                   folderPath: <+stage.variables.tf_folder>
                             secretManagerRef: harnessSecretManager
@@ -57,7 +57,7 @@ pipeline:
                                         branch: <+stage.variables.tf_branch>
                                         paths:
                                           - <+stage.variables.tf_remote_vars>
-                                        connectorRef: <+stage.variables.harness_git_connector>
+                                        connectorRef: ${git_connector_ref}
                               - varFile:
                                   identifier: vars
                                   spec:
@@ -75,7 +75,7 @@ pipeline:
                           includePipelineExecutionHistory: true
                           approvers:
                             userGroups:
-                              - account.SE_Admin
+                              - ${approver_ref}
                             minimumCount: 1
                             disallowPipelineExecutor: false
                           approverInputs: []
@@ -109,7 +109,7 @@ pipeline:
                             failureStrategies: []
                   failureStrategies: []
                   delegateSelectors:
-                    - cristian-delegate-tf
+                    - ${delegate_ref}
             rollbackSteps: []
           serviceDependencies: []
         tags: {}
@@ -154,19 +154,3 @@ pipeline:
             type: String
             description: ""
             value: <+input>
-          - name: harness_git_connector
-            type: String
-            description: ""
-            value: <+input>
-          - name: git_repo
-            type: String
-            description: ""
-            value: <+input>
-          - name: git_user
-            type: String
-            description: ""
-            value: <+input>
-          - name: git_password_ref
-            type: Secret
-            description: ""
-            value: account.crizstian_github_token
