@@ -14,18 +14,24 @@ Implementation code is organized with the following structure
 │   ├── docker
 │   │   └── devcontainer.Dockerfile
 │   ├── fixtures
-│   │   └── ...
-│   ├── harness
-│   │   └── templates
-│   │       └── ...
-│   └── manifests
-│       └── ...
+│   │   └── harness-tf.jpg
+│   └── scripts
+│       ├── ...
 ├── harness-provision
+│   ├── inputset.tf
 │   ├── main.tf
+│   ├── pipeline.tf
 │   ├── provider.tf
+│   ├── templates
+│   │   ├── inputsets
+│   │   │   └── tf_account_setup_inputset_apply.tpl
+│   │   └── pipelines
+│   │       └── tf_account_setup.tpl
 │   └── variables.tf
 └── tfvars
     └── cristian
         └── account.tfvars
+
+10 directories, 17 files
 
 ```
