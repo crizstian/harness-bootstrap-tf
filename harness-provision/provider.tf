@@ -18,7 +18,8 @@ terraform {
     }
   }
 
-  backend "gcs" {}
+  #backend "gcs" {}
+  backend "s3" {}
 }
 
 resource "random_string" "suffix" {

@@ -38,8 +38,15 @@ pipeline:
                               type: Inline
                               spec:
                                 content: |-
+                                  %{ if tf_backend_type == "aws" }
                                   bucket = "<+stage.variables.tf_backend_bucket>"
                                   prefix = "<+stage.variables.tf_backend_prefix>"
+                                  %{ endif }
+                                  %{ if tf_backend_type == "aws" }
+                                  tf_bucket               = "<+stage.variables.tf_bucket>"
+                                  tf_key                  = "<+stage.variables.tf_key>"
+                                  tf_region               = "<+stage.variables.tf_region>"
+                                  %{ endif }
                             environmentVariables:
                               - name: GOOGLE_BACKEND_CREDENTIALS
                                 value: <+stage.variables.tf_gcp_keys>
@@ -137,7 +144,12 @@ pipeline:
           - name: harness_api_key
             type: Secret
             description: ""
-            value: account.cristian_harness_platform_api_key
+            value: account.${workspace}_harness_platform_api_key
+          - name: tf_action
+            type: String
+            description: ""
+            value: <+input>
+          %{ if tf_backend_type == "gcp" }
           - name: tf_backend_bucket
             type: String
             description: ""
@@ -149,8 +161,27 @@ pipeline:
           - name: tf_gcp_keys
             type: Secret
             description: ""
-            value: account.Cristian_GOOGLE_BACKEND_CREDENTIALS
-          - name: tf_action
+            value: account.${workspace}_GOOGLE_BACKEND_CREDENTIALS
+            %{ endif }
+            %{ if tf_backend_type == "aws" }
+            - name: tf_bucket
             type: String
             description: ""
             value: <+input>
+          - name: tf_key
+            type: String
+            description: ""
+            value: <+input>
+          - name: tf_region
+            type: Secret
+            description: ""
+            value: <+input>
+          - name: tf_access_key
+            type: Secret
+            description: ""
+            value: account.${workspace}_AWS_ACCESS_KEY_ID
+          - name: tf_secret_key
+            type: Secret
+            description: ""
+            value: account.${workspace}_AWS_SECRET_ACCESS_KEY
+          %{ endif }
