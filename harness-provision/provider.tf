@@ -18,7 +18,6 @@ terraform {
     }
   }
 
-  #backend "gcs" {}
   backend "s3" {}
 }
 

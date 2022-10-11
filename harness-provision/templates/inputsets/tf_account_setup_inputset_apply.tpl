@@ -26,12 +26,12 @@ inputSet:
         - name: tf_remote_vars
           type: String
           value: ${tf_remote_vars}
-        - name: tf_backend_bucket
+        - name: tf_bucket
           type: String
-          value: ${tf_backend_bucket}
-        - name: tf_backend_prefix
+          value: ${tf_bucket}
+        - name: tf_key
           type: String
-          value: ${tf_backend_prefix}
-        - name: tf_action
-          type: String
-          value: apply
+          value: ${tf_key}
+        - name: tf_region
+          type: Secret
+          value: ${tf_region}
