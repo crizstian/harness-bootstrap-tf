@@ -42,8 +42,11 @@ pipeline:
                                   tf_key                  = "<+stage.variables.tf_key>"
                                   tf_region               = "<+stage.variables.tf_region>"
                             environmentVariables:
-                              - name: GOOGLE_BACKEND_CREDENTIALS
-                                value: <+stage.variables.tf_gcp_keys>
+                              - name: AWS_ACCESS_KEY_ID
+                                value: <+stage.variables.tf_access_key>
+                                type: String
+                              - name: AWS_SECRET_ACCESS_KEY
+                                value: <+stage.variables.tf_secret_key>
                                 type: String
                             varFiles:
                               - varFile:
