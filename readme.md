@@ -18,10 +18,7 @@ Implementation code is organized with the following structure
 │   ├── manifests
 │   │   └── delegate-example.yml
 │   └── scripts
-│       ├── apply
-│       ├── destroy
-│       ├── plan
-│       └── start
+│       ├── ...
 ├── harness-provision
 │   ├── cristian-delegate-tf-harness-delegate.yml
 │   ├── delegate-init.tf
