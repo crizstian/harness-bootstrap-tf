@@ -33,9 +33,6 @@ Implementation code is organized with the following structure
 │   └── variables.tf
 └── tfvars
     └── cristian
-        ├── account.tfvars
-        ├── connectors.tfvars
-        ├── delegates.tfvars
-        └── pipelines.tfvars
+        ├── ....tfvars
 
 ```
