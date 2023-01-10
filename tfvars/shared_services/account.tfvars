@@ -23,7 +23,7 @@ harness_platform_organizations = {
 }
 
 github_details = {
-  enable         = true
+  enable         = false
   branch         = "main"
   commit_message = "Managed by Terraform"
   commit_author  = "Terraform User"

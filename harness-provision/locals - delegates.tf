@@ -7,7 +7,7 @@ locals {
 
   delegate_init_service = {
     enable     = length(local.delegate_count) > 0
-    org_id     = try(local.common_schema.org_id, "")
+    org_id     = try(module.bootstrap_harness_account.organization[var.organization_prefix].org_id, "")
     project_id = try(local.common_schema.project_id, "")
   }
 }

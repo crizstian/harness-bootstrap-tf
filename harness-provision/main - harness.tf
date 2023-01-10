@@ -50,9 +50,9 @@ module "bootstrap_harness_policies" {
   ]
   source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-policy?ref=main"
 
-  suffix                    = random_string.suffix.id
-  tags                      = local.common_tags.tags
-  org_id                    = local.common_schema.org_id
+  suffix = random_string.suffix.id
+  tags   = local.common_tags.tags
+  /* org_id                    = local.common_schema.org_id */
   harness_platform_policies = local.policies
 }
 

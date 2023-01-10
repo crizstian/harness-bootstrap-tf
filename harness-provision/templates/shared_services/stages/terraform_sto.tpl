@@ -33,7 +33,13 @@ template:
                           shell: Sh
                           command: |-
                             ls -la
-                            tfsec /harness
+                            tfsec --out tfsecout /harness
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - AllErrors
+                              action:
+                                type: Ignore
                     - step:
                         type: Run
                         name: Checkov
@@ -43,7 +49,7 @@ template:
                           image: bridgecrew/checkov
                           shell: Sh
                           command: |
-                            checkov --skip-path tfscan.json --output json --compact --output-file-path checkov -d .
+                            checkov --skip-path tfscan.json --skip-path tfsecout --output json --compact --output-file-path checkov -d .
                           privileged: false
                         failureStrategies:
                           - onFailure:

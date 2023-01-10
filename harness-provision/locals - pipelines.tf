@@ -11,6 +11,7 @@ locals {
     git_repo_ref      = var.harness_platform_organizations[var.organization_prefix].git_repo_name
     service_ref       = try(module.bootstrap_harness_delegates.delegate_init.service_ref, "")
     environment_ref   = try(module.bootstrap_harness_delegates.delegate_init.environment_ref, "")
+    org_id            = module.bootstrap_harness_account.organization[var.organization_prefix].org_id
   }
 }
 
@@ -28,7 +29,7 @@ locals {
           local.common_schema,
           local.templated_common_vars,
           {
-            git_connector_ref = try(local.module_connectors.github_connectors[values.components.pipeline.vars.git_connector].identifier, local.github_connector_ref)
+            git_connector_ref = local.module_connectors.github_connectors[values.components.pipeline.vars.git_connector].identifier
           },
           [for template_ref, details in try(values.components.pipeline.stages, {}) :
             {
