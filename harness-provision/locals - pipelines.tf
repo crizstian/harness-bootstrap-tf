@@ -43,7 +43,13 @@ locals {
     inputset = { for input, details in try(values.components.inputset, {}) : input => merge(
       details,
       {
-        vars = merge(
+        vars = try(values.components.pipeline.foreign_pipeline, false) ? merge(
+          local.remote_state.pipelines[pipe].vars,
+          details.vars,
+          {
+            docker_connector_ref = try(local.module_connectors.docker_connectors[details.vars.docker_connector].identifier, local.docker_account_ref)
+          }
+          ) : merge(
           details.vars,
           local.templated_common_vars,
           {
