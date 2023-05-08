@@ -1,4 +1,4 @@
-# github connectors
+/* # github connectors
 locals {
   github_connectors = { for key, value in var.harness_platform_github_connectors : key => merge(
     value,
@@ -16,4 +16,4 @@ locals {
   docker_connector_ref = try(module.bootstrap_harness_connectors.connectors.docker_connectors[local.organization_short_name].identifier, local.docker_account_ref)
   github_connector_ref = try(module.bootstrap_harness_connectors.connectors.github_connectors[local.organization_short_name].identifier, local.github_account_ref)
   module_connectors    = module.bootstrap_harness_connectors.connectors
-}
+} */

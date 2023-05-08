@@ -18,3 +18,8 @@ apply.plan
 demo.plan
 tfplan
 tfplan.json
+
+**secrets.tfvars
+
+env/**
+!env/**example

@@ -1,4 +1,4 @@
-# seed pipeline
+/* # seed pipeline
 locals {
   store_pipelines_in_git = try(var.github_details.enable, false)
 
@@ -60,4 +60,4 @@ locals {
     trigger = { for t, details in try(values.components.trigger, {}) : t => details if details.enable }
     } if values.components.pipeline.enable
   }
-}
+} */

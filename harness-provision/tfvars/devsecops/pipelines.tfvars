@@ -1,4 +1,4 @@
-harness_platform_pipelines = {
+/* harness_platform_pipelines = {
   harness_seed_setup = {
     components = {
       pipeline = {
@@ -92,4 +92,4 @@ harness_platform_pipelines = {
       }
     }
   }
-}
+} */

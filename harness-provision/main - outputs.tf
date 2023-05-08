@@ -1,4 +1,4 @@
-# Outputs
+/* # Outputs
 output "harness" {
   value = merge(
     length(keys(module.bootstrap_harness_account.organization)) > 0 ? { organizations = {
@@ -13,4 +13,4 @@ output "harness" {
     length(keys(module.bootstrap_harness_templates.templates)) > 0 ? { templates = module.bootstrap_harness_templates.templates } : {},
     length(keys(module.bootstrap_harness_policies.policies)) > 0 ? { policies = module.bootstrap_harness_policies.policies } : {},
   )
-}
+} */

@@ -1,4 +1,4 @@
-# DELEGATES
+/* # DELEGATES
 harness_platform_delegates = {
   k8s = {
     "cristian-delegate-tf" = {
@@ -32,4 +32,4 @@ harness_platform_delegates = {
       }
     }
   }
-}
+} */

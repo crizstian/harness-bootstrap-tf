@@ -1,4 +1,4 @@
-# common vars
+/* # common vars
 locals {
   delegate_count       = [for type, delegates in var.harness_platform_delegates : { for key, value in delegates : key => value if value.enable && type == "k8s" }]
   delegate_account_ref = var.remote_state.enable ? element(keys(local.remote_state.delegates.account), 0) : ""
@@ -10,4 +10,4 @@ locals {
     org_id     = try(module.bootstrap_harness_account.organization[var.organization_prefix].org_id, "")
     project_id = try(local.common_schema.project_id, "")
   }
-}
+} */

@@ -1,6 +1,6 @@
 # OPA policies 
 locals {
-  policies = { for key, values in var.harness_opa_policies : key => values if values.enable }
+  /* policies = { for key, values in var.harness_opa_policies : key => values if values.enable } */
 
   #  policy_sets = { for key, values in var.harness_opa_policy_sets : key =>
   #    {
