@@ -1,4 +1,5 @@
 terraform.*
+!terraform.tftpl*
 *.terraform*
 *bootstrap.tfvars
 contrib/examples/vars.tf

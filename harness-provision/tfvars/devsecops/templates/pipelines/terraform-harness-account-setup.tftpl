@@ -60,6 +60,8 @@ template:
                               folderPath: <+stage.variables.TERRAFORM_FOLDER>
                               repoName: <+pipeline.variables.TERRAFORM_REPO>
                             type: Github
+                          modulesource:                          
+                            useConnectorCredentials: true
                         backendConfig:
                           type: Inline
                           spec:
