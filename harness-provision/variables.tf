@@ -1,11 +1,11 @@
 # Harness Platform variables
-variable "harness_platform_api_key" {
+/* variable "harness_platform_api_key" {
   type      = string
   sensitive = true
 }
 variable "harness_platform_account_id" {
   type = string
-}
+} */
 variable "harness_platform_organizations" {
   type    = map(any)
   default = {}
@@ -37,6 +37,10 @@ variable "harness_platform_gcp_connectors" {
   default = {}
 }
 variable "harness_platform_gitlab_connectors" {
+  # type    = map(any)
+  default = {}
+}
+variable "harness_platform_kubernetes_connectors" {
   # type    = map(any)
   default = {}
 }

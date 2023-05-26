@@ -8,6 +8,21 @@ template:
   spec:
     stages:
       - stage:
+          name: Terraform STO
+          identifier: Terraform_STO
+          template:
+            templateRef: ${sto.template_id}
+            versionLabel: "${sto.template_version}"
+            templateInputs:
+              type: SecurityTests
+              variables:
+                - name: k8s_connector_ref
+                  type: String
+                  value: <+input>
+                - name: docker_connector_ref
+                  type: String
+                  value: <+input>
+      - stage:
           name: Terraform
           identifier: Terraform
           description: ""
@@ -39,12 +54,12 @@ template:
                         configFiles:
                           store:
                             spec:
-                              connectorRef: <+input>
+                              connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>
                               gitFetchType: Branch
                               branch: <+stage.variables.TERRAFORM_BRANCH>
                               folderPath: <+stage.variables.TERRAFORM_FOLDER>
-                              repoName: <+stage.variables.TERRAFORM_REPO>
-                            type: GitLab
+                              repoName: <+pipeline.variables.TERRAFORM_REPO>
+                            type: Github
                         backendConfig:
                           type: Inline
                           spec:
@@ -70,17 +85,17 @@ template:
                               identifier: harness_account
                               spec:
                                 store:
-                                  type: GitLab
+                                  type: Github
                                   spec:
                                     gitFetchType: Branch
-                                    repoName: <+stage.variables.TERRAFORM_REPO>
+                                    repoName: <+pipeline.variables.TERRAFORM_REPO>
                                     branch: <+stage.variables.TERRAFORM_BRANCH>
                                     paths:
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/account.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/connectors.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/projects.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/templates.tfvars
-                                    connectorRef: <+input>
+                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/account.tfvars
+                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/connectors.tfvars
+                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/projects.tfvars
+                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/templates.tfvars
+                                    connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>
                         secretManagerRef: account.harnessSecretManager
                         workspace: <+stage.variables.TERRAFORM_WORKSPACE>
                         exportTerraformPlanJson: true
@@ -183,10 +198,6 @@ template:
               type: String
               description: ""
               value: <+input>.allowedValues(apply,destroy)
-            - name: TERRAFORM_REPO
-              type: String
-              description: ""
-              value: <+input>.default(${TERRAFORM_REPO})
             - name: TERRAFORM_FOLDER
               type: String
               description: ""
@@ -194,10 +205,25 @@ template:
             - name: TERRAFORM_BRANCH
               type: String
               description: ""
-              value: <+input>.default(${TERRAFORM_BRANCH})
+              value: <+codebase.branch>
             - name: DELEGATE_SELECTOR
               type: String
               description: ""
               value: <+input>.default(${DELEGATE_SELECTOR})
           delegateSelectors:
             - <+stage.variables.DELEGATE_SELECTOR>
+    properties:      
+      ci:        
+        codebase:          
+          connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>         
+          repoName: <+pipeline.variables.TERRAFORM_REPO>         
+          build: <+input>
+    variables:      
+      - name: GITHUB_CONNECTOR_ID        
+        type: String        
+        description: ""        
+        value: <+input>
+      - name: TERRAFORM_REPO        
+        type: String        
+        description: ""        
+        value: <+input>.default(${TERRAFORM_REPO})

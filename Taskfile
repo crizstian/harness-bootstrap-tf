@@ -2,8 +2,8 @@ version: "3"
 
 dotenv: ["./env/.selatam"]
 env:
-  TF_VAR_harness_platform_api_key: $HARNESS_PLATFORM_API_KEY
-  TF_VAR_harness_platform_account_id: $HARNESS_ACCOUNT_ID
+  # TF_VAR_harness_platform_api_key: $HARNESS_PLATFORM_API_KEY
+  # TF_VAR_harness_platform_account_id: $HARNESS_ACCOUNT_ID
   # CONFIG: '{{.CONFIG | default "."}}'
 
 vars:

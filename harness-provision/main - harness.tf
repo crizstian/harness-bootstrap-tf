@@ -12,15 +12,16 @@ module "bootstrap_harness_account" {
 module "bootstrap_harness_connectors" {
   source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-connector?ref=refactor"
 
-  suffix                             = random_string.suffix.id
-  tags                               = local.common_tags
-  organizations                      = module.bootstrap_harness_account.organizations
-  projects                           = module.bootstrap_harness_account.projects
-  harness_platform_gitlab_connectors = var.harness_platform_gitlab_connectors
-  harness_platform_github_connectors = var.harness_platform_github_connectors
-  harness_platform_docker_connectors = var.harness_platform_docker_connectors
-  harness_platform_aws_connectors    = var.harness_platform_aws_connectors
-  harness_platform_gcp_connectors    = var.harness_platform_gcp_connectors
+  suffix                                 = random_string.suffix.id
+  tags                                   = local.common_tags
+  organizations                          = module.bootstrap_harness_account.organizations
+  projects                               = module.bootstrap_harness_account.projects
+  harness_platform_gitlab_connectors     = var.harness_platform_gitlab_connectors
+  harness_platform_github_connectors     = var.harness_platform_github_connectors
+  harness_platform_docker_connectors     = var.harness_platform_docker_connectors
+  harness_platform_aws_connectors        = var.harness_platform_aws_connectors
+  harness_platform_gcp_connectors        = var.harness_platform_gcp_connectors
+  harness_platform_kubernetes_connectors = var.harness_platform_kubernetes_connectors
 }
 
 # Creacion de Harness Templates
