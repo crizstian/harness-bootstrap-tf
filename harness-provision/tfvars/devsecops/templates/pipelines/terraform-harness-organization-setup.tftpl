@@ -100,7 +100,7 @@ template:
                                       - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/pipelines.tfvars
                                       - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/inputsets.tfvars
                                       - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/triggers.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/variables.tfvars 
+                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/variables.tfvars
                                     connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>
                         secretManagerRef: account.harnessSecretManager
                         workspace: <+stage.variables.TERRAFORM_WORKSPACE>
@@ -221,8 +221,8 @@ template:
     properties:      
       ci:        
         codebase:          
-          connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>         
-          repoName: <+pipeline.variables.TERRAFORM_REPO>         
+          connectorRef: <+input>        
+          repoName: <+input>        
           build: <+input>
     variables:      
       - name: GITHUB_CONNECTOR_ID        

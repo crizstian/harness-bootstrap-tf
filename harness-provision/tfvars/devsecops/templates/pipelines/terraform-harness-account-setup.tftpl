@@ -93,10 +93,11 @@ template:
                                     repoName: <+pipeline.variables.TERRAFORM_REPO>
                                     branch: <+stage.variables.TERRAFORM_BRANCH>
                                     paths:
-                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/account.tfvars
-                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/connectors.tfvars
-                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/projects.tfvars
-                                      - <+stage.variables.TERRAFORM_FOLDER>/tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/templates.tfvars
+                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/account.tfvars
+                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/connectors.tfvars
+                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/projects.tfvars
+                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/templates.tfvars
+                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/environments.tfvars
                                     connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>
                         secretManagerRef: account.harnessSecretManager
                         workspace: <+stage.variables.TERRAFORM_WORKSPACE>
@@ -217,8 +218,8 @@ template:
     properties:      
       ci:        
         codebase:          
-          connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>         
-          repoName: <+pipeline.variables.TERRAFORM_REPO>         
+          connectorRef: <+input>        
+          repoName: <+input>        
           build: <+input>
     variables:      
       - name: GITHUB_CONNECTOR_ID        
