@@ -58,6 +58,12 @@ template:
                               bucket = "<+stage.variables.GCS_BUCKET>"
                               prefix = "<+stage.variables.GCS_PREFIX>"
                         environmentVariables:
+                          - name: TF_VAR_harness_platform_account_id
+                            value: <+account.identifier>
+                            type: String
+                          - name: TF_VAR_harness_platform_api_key
+                            value: <+stage.variables.HARNESS_PLATFORM_API_KEY>
+                            type: String
                           - name: HARNESS_ACCOUNT_ID
                             value: <+account.identifier>
                             type: String
