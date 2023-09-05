@@ -12,7 +12,7 @@ template:
         type: KubernetesDirect
         spec:
           connectorRef: <+stage.variables.k8s_connector_ref>
-          namespace: harness-delegate-ng
+          namespace: default
           automountServiceAccountToken: true
           nodeSelector: {}
           os: Linux

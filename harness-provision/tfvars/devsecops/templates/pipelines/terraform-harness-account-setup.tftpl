@@ -8,21 +8,6 @@ template:
   spec:
     stages:
       - stage:
-          name: Terraform STO
-          identifier: Terraform_STO
-          template:
-            templateRef: ${sto.template_id}
-            versionLabel: "${sto.template_version}"
-            templateInputs:
-              type: SecurityTests
-              variables:
-                - name: k8s_connector_ref
-                  type: String
-                  value: <+input>
-                - name: docker_connector_ref
-                  type: String
-                  value: <+input>
-      - stage:
           name: Terraform
           identifier: Terraform
           description: ""
@@ -54,7 +39,11 @@ template:
                         configFiles:
                           store:
                             spec:
-                              connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>
+                              %{ if length(connectors) > 0 }
+                              connectorRef: ${connectors.GIT_CONNECTOR.id}
+                              %{ else }
+                              connectorRef: <+input>
+                              %{ endif }
                               gitFetchType: Branch
                               branch: <+stage.variables.TERRAFORM_BRANCH>
                               folderPath: <+stage.variables.TERRAFORM_FOLDER>
@@ -70,13 +59,13 @@ template:
                               prefix = "<+stage.variables.GCS_PREFIX>"
                         environmentVariables:
                           - name: HARNESS_ACCOUNT_ID
-                            value: <+stage.variables.HARNESS_ACCOUNT_ID>
+                            value: <+account.identifier>
                             type: String
                           - name: HARNESS_PLATFORM_API_KEY
                             value: <+stage.variables.HARNESS_PLATFORM_API_KEY>
                             type: String
                           - name: HARNESS_ENDPOINT
-                            value: <+stage.variables.HARNESS_ENDPOINT>
+                            value: https://app.harness.io/gateway
                             type: String
                           - name: GOOGLE_BACKEND_CREDENTIALS
                             value: <+stage.variables.GOOGLE_BACKEND_CREDENTIALS>
@@ -84,7 +73,7 @@ template:
                         varFiles:
                           - varFile:
                               type: Remote
-                              identifier: harness_account
+                              identifier: tfvars
                               spec:
                                 store:
                                   type: Github
@@ -92,13 +81,12 @@ template:
                                     gitFetchType: Branch
                                     repoName: <+pipeline.variables.TERRAFORM_REPO>
                                     branch: <+stage.variables.TERRAFORM_BRANCH>
-                                    paths:
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/account.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/connectors.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/projects.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/templates.tfvars
-                                      - tfvars/<+stage.variables.TERRAFORM_WORKSPACE>/environments.tfvars
-                                    connectorRef: <+pipeline.variables.GITHUB_CONNECTOR_ID>
+                                    paths: <+input>
+                                    %{ if length(connectors) > 0 }
+                                    connectorRef: ${connectors.GIT_CONNECTOR.id}
+                                    %{ else }
+                                    connectorRef: <+input>
+                                    %{ endif }
                         secretManagerRef: account.harnessSecretManager
                         workspace: <+stage.variables.TERRAFORM_WORKSPACE>
                         exportTerraformPlanJson: true
@@ -172,27 +160,19 @@ template:
             - name: GCS_BUCKET
               type: String
               description: ""
-              value: <+input>.default(${GCS_BUCKET})
+              value: <+input>
             - name: GCS_PREFIX
               type: String
               description: ""
-              value: <+input>.default(${GCS_PREFIX})
-            - name: HARNESS_ACCOUNT_ID
-              type: String
-              description: ""
-              value: <+input>.default(${HARNESS_ACCOUNT_ID})
+              value: <+input>
             - name: HARNESS_PLATFORM_API_KEY
               type: Secret
               description: ""
-              value: <+input>.default(${HARNESS_PLATFORM_API_KEY})
-            - name: HARNESS_ENDPOINT
-              type: String
-              description: ""
-              value: https://app.harness.io/gateway
+              value: ${HARNESS_PLATFORM_API_KEY}
             - name: GOOGLE_BACKEND_CREDENTIALS
               type: Secret
               description: ""
-              value: <+input>.default(${GOOGLE_BACKEND_CREDENTIALS})
+              value: ${GOOGLE_BACKEND_CREDENTIALS}
             - name: TERRAFORM_WORKSPACE
               type: String
               description: ""
@@ -204,29 +184,16 @@ template:
             - name: TERRAFORM_FOLDER
               type: String
               description: ""
-              value: <+input>.default(${TERRAFORM_FOLDER})
+              value: <+input>
             - name: TERRAFORM_BRANCH
               type: String
               description: ""
               value: <+codebase.branch>
-            - name: DELEGATE_SELECTOR
-              type: String
-              description: ""
-              value: <+input>.default(${DELEGATE_SELECTOR})
           delegateSelectors:
-            - <+stage.variables.DELEGATE_SELECTOR>
-    properties:      
-      ci:        
-        codebase:          
-          connectorRef: <+input>        
-          repoName: <+input>        
-          build: <+input>
+            - <+input>
     variables:      
-      - name: GITHUB_CONNECTOR_ID        
-        type: String        
-        description: ""        
-        value: <+input>
       - name: TERRAFORM_REPO        
         type: String        
         description: ""        
-        value: <+input>.default(${TERRAFORM_REPO})
+        value: <+input>
+    delegateSelectors: <+input>

@@ -1,4 +1,4 @@
-harness_opa_policies = {
+/* harness_opa_policies = {
   sto_required = {
     name        = "[DevSecOps Team] Stage - Security Module Required - Platform Policy"
     enable      = true
@@ -6,4 +6,4 @@ harness_opa_policies = {
     file        = "templates/devsecops/policies/platform/sto-required.rego"
     org_id      = "" # override policy level creation to account level
   }
-}
+} */

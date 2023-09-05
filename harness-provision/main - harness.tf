@@ -1,3 +1,9 @@
+resource "random_string" "suffix" {
+  length  = 4
+  special = false
+  lower   = true
+}
+
 # Create Organizations
 module "bootstrap_harness_account" {
   source                         = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-structure?ref=refactor"
@@ -7,21 +13,25 @@ module "bootstrap_harness_account" {
   harness_platform_projects      = var.harness_platform_projects
 }
 
-# Creates and Setup Harness connectors
-# TODO: Add AWS, GCP, Azure and CCM connectors
+# Creacion de Conectores
 module "bootstrap_harness_connectors" {
   source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-connector?ref=refactor"
 
-  suffix                                 = random_string.suffix.id
-  tags                                   = local.common_tags
-  organizations                          = module.bootstrap_harness_account.organizations
-  projects                               = module.bootstrap_harness_account.projects
-  harness_platform_gitlab_connectors     = var.harness_platform_gitlab_connectors
-  harness_platform_github_connectors     = var.harness_platform_github_connectors
-  harness_platform_docker_connectors     = var.harness_platform_docker_connectors
-  harness_platform_aws_connectors        = var.harness_platform_aws_connectors
-  harness_platform_gcp_connectors        = var.harness_platform_gcp_connectors
-  harness_platform_kubernetes_connectors = var.harness_platform_kubernetes_connectors
+  suffix        = random_string.suffix.id
+  tags          = local.common_tags
+  organizations = module.bootstrap_harness_account.organizations
+  projects      = module.bootstrap_harness_account.projects
+
+  harness_platform_github_connectors      = var.harness_platform_github_connectors
+  harness_platform_gitlab_connectors      = var.harness_platform_gitlab_connectors
+  harness_platform_docker_connectors      = var.harness_platform_docker_connectors
+  harness_platform_service_now_connectors = var.harness_platform_service_now_connectors
+  harness_platform_dynatrace_connectors   = var.harness_platform_dynatrace_connectors
+  harness_platform_gcp_connectors         = var.harness_platform_gcp_connectors
+  harness_platform_aws_connectors         = var.harness_platform_aws_connectors
+  harness_platform_newrelic_connectors    = var.harness_platform_newrelic_connectors
+  harness_platform_helm_connectors        = var.harness_platform_helm_connectors
+  harness_platform_kubernetes_connectors  = var.harness_platform_kubernetes_connectors
 }
 
 # Creacion de Harness Templates
@@ -35,67 +45,15 @@ module "bootstrap_harness_templates" {
   harness_platform_templates = var.harness_platform_templates
 }
 
-/* 
-# Creates and uploads delegates manifests to Harness FileStore: => Account/Org/File
-# Configures delegates at Account Level
-# TODO: Auto Install delegates
-module "bootstrap_harness_delegates" {
-  depends_on = [
-    module.bootstrap_harness_account
-  ]
-  source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-delegate?ref=main"
-
-  suffix                = random_string.suffix.id
-  tags                  = local.common_tags.tags
-  delegate_init_service = local.delegate_init_service
-
-  harness_platform_api_key   = var.harness_platform_api_key
-  harness_account_id         = var.harness_platform_account_id
-  harness_platform_delegates = var.harness_platform_delegates
+# Create Environments
+module "bootstrap_harness_environments" {
+  source                           = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-infrastructure?ref=refactor"
+  suffix                           = random_string.suffix.id
+  tags                             = local.common_tags
+  organizations                    = module.bootstrap_harness_account.organizations
+  projects                         = module.bootstrap_harness_account.projects
+  templates                        = module.bootstrap_harness_templates.all
+  connectors                       = module.bootstrap_harness_connectors.all
+  harness_platform_environments    = var.harness_platform_environments
+  harness_platform_infrastructures = var.harness_platform_infrastructures
 }
-
-
-# Creates Policies
-module "bootstrap_harness_policies" {
-  depends_on = [
-    module.bootstrap_harness_account
-  ]
-  source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-policy?ref=main"
-
-  suffix = random_string.suffix.id
-  tags   = local.common_tags.tags
-  #org_id                    = local.common_schema.org_id 
-  harness_platform_policies = local.policies
-}
-
-# Creates Pipeline Templates
-module "bootstrap_harness_templates" {
-  depends_on = [
-    module.bootstrap_harness_account,
-    module.bootstrap_harness_delegates
-  ]
-  source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-template?ref=main"
-
-  suffix                     = random_string.suffix.id
-  tags                       = local.common_tags.tags
-  org_id                     = local.common_schema.org_id
-  harness_platform_templates = local.templates
-}
-
-# # Creates Pipelines
-module "bootstrap_harness_pipelines" {
-  depends_on = [
-    module.bootstrap_harness_account,
-    module.bootstrap_harness_delegates,
-    module.bootstrap_harness_templates
-  ]
-  source = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-pipeline?ref=main"
-
-  suffix                     = random_string.suffix.id
-  tags                       = local.common_tags.tags
-  harness_platform_pipelines = local.pipelines
-  store_pipelines_in_git     = local.store_pipelines_in_git
-
-  github_details      = var.github_details
-  organization_prefix = var.organization_prefix
-} */
