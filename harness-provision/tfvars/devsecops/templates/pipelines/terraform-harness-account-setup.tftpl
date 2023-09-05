@@ -45,7 +45,7 @@ template:
                               connectorRef: <+input>
                               %{ endif }
                               gitFetchType: Branch
-                              branch: <+stage.variables.TERRAFORM_BRANCH>
+                              branch: <+stage.variables.TERRAFORM_WORKSPACE>
                               folderPath: <+stage.variables.TERRAFORM_FOLDER>
                               repoName: <+pipeline.variables.TERRAFORM_REPO>
                             type: Github
@@ -80,7 +80,7 @@ template:
                                   spec:
                                     gitFetchType: Branch
                                     repoName: <+pipeline.variables.TERRAFORM_REPO>
-                                    branch: <+stage.variables.TERRAFORM_BRANCH>
+                                    branch: <+stage.variables.TERRAFORM_WORKSPACE>
                                     paths: <+input>
                                     %{ if length(connectors) > 0 }
                                     connectorRef: ${connectors.GIT_CONNECTOR.id}
@@ -185,12 +185,6 @@ template:
               type: String
               description: ""
               value: <+input>
-            - name: TERRAFORM_BRANCH
-              type: String
-              description: ""
-              value: <+codebase.branch>
-          delegateSelectors:
-            - <+input>
     variables:      
       - name: TERRAFORM_REPO        
         type: String        
