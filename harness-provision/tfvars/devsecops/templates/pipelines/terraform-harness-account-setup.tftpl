@@ -76,8 +76,8 @@ template:
                           - name: GOOGLE_BACKEND_CREDENTIALS
                             value: <+stage.variables.GOOGLE_BACKEND_CREDENTIALS>
                             type: String
-                          - name: GOOGLE_APPLICATION_CREDENTIALS
-                            value: <+stage.variables.GOOGLE_BACKEND_CREDENTIALS>
+                          - name: GOOGLE_CREDENTIALS
+                            value: <+stage.variables.GOOGLE_CREDENTIALS>
                             type: String
                         varFiles:
                           - varFile:
@@ -182,6 +182,10 @@ template:
               type: Secret
               description: ""
               value: ${GOOGLE_BACKEND_CREDENTIALS}
+            - name: GOOGLE_CREDENTIALS
+              type: Secret
+              description: ""
+              value: ${GOOGLE_CREDENTIALS}
             - name: TERRAFORM_WORKSPACE
               type: String
               description: ""

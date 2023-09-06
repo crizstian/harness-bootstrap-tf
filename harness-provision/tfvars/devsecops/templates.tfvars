@@ -46,6 +46,7 @@ harness_platform_templates = {
       HARNESS_ACCOUNT_ID         = "Io9SR1H7TtGBq9LVyJVB2w"
       HARNESS_PLATFORM_API_KEY   = "account.cristian_harness_sa"
       GOOGLE_BACKEND_CREDENTIALS = "account.Cristian_GOOGLE_BACKEND_CREDENTIALS"
+      GOOGLE_CREDENTIALS         = "account.Cristian__GOOGLE_CREDENTIALS"
       ENVIRONMENT_NAME           = "harness"
       DELEGATE_SELECTOR          = "cristian-se-delegate"
       GCS_BUCKET                 = "crizstian-terraform"
