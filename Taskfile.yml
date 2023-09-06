@@ -15,6 +15,7 @@ vars:
     -var-file=./tfvars/$workspace/account.tfvars \
     -var-file=./tfvars/$workspace/projects.tfvars \
     -var-file=./tfvars/$workspace/connectors.tfvars \
+    -var-file=./tfvars/$workspace/policies.tfvars \
     -var-file=./tfvars/$workspace/templates.tfvars
   #\
   #-var-file=./tfvars/$workspace/environments.tfvars

@@ -27,3 +27,11 @@ variable "harness_platform_infrastructures" {
   description = "Harness templates to be applied"
   default     = {}
 }
+variable "harness_platform_policies" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
+variable "harness_platform_policy_sets" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
