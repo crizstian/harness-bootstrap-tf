@@ -76,6 +76,9 @@ template:
                           - name: GOOGLE_BACKEND_CREDENTIALS
                             value: <+stage.variables.GOOGLE_BACKEND_CREDENTIALS>
                             type: String
+                          - name: GOOGLE_APPLICATION_CREDENTIALS
+                            value: <+stage.variables.GOOGLE_BACKEND_CREDENTIALS>
+                            type: String
                         varFiles:
                           - varFile:
                               type: Remote
