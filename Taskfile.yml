@@ -27,6 +27,13 @@ tasks:
     cmds:
       - task --list
   # ──────────────────────────────────────────────────────────────────────────────
+  gcp:
+    desc: GCP Authentication
+    summary: Generate SA GCP Authentication
+    aliases: [gcp, auth]
+    cmds:
+      - cmd: gcloud auth application-default login
+  # ──────────────────────────────────────────────────────────────────────────────
   terraform:
     desc: Terraform execute
     summary: full terraform initialization

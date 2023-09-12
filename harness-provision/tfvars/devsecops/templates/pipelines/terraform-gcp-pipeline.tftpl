@@ -26,7 +26,7 @@ template:
                     name: Fetch Instances
                     identifier: fetchInstances
                     type: FetchInstanceScript
-                    timeout: 10m
+                    timeout: 30m
                     spec: {}
                 - step:
                     type: TerraformPlan
@@ -73,12 +73,6 @@ template:
                           - name: HARNESS_ENDPOINT
                             value: https://app.harness.io/gateway
                             type: String
-                          - name: GOOGLE_BACKEND_CREDENTIALS
-                            value: <+stage.variables.GOOGLE_BACKEND_CREDENTIALS>
-                            type: String
-                          - name: GOOGLE_CREDENTIALS
-                            value: <+stage.variables.GOOGLE_CREDENTIALS>
-                            type: String
                         varFiles:
                           - varFile:
                               type: Remote
@@ -100,7 +94,7 @@ template:
                         workspace: <+stage.variables.TERRAFORM_WORKSPACE>
                         exportTerraformPlanJson: true
                         skipRefreshCommand: false
-                    timeout: 10m
+                    timeout: 30m
                 - stepGroup:
                     name: Terraform Compliance
                     identifier: Terraform_Compliance
@@ -121,7 +115,7 @@ template:
                               - name: tfplan
                                 type: String
                                 value: tfplan
-                          timeout: 10m
+                          timeout: 30m
                       - step:
                           type: ShellScript
                           name: Infracost
@@ -148,7 +142,7 @@ template:
                               - name: tfcost
                                 type: String
                                 value: tfcost
-                          timeout: 10m
+                          timeout: 30m
                       - parallel:
                           - step:
                               type: Policy
@@ -160,7 +154,7 @@ template:
                                 type: Custom
                                 policySpec:
                                   payload: <+pipeline.stages.Terraform.spec.execution.steps.Terraform_Compliance.steps.Export_Plan.output.outputVariables.tfplan>
-                              timeout: 10m
+                              timeout: 30m
                               failurestrategies:                              
                                 - onFailure:                                  
                                     errors:                                    
@@ -182,7 +176,7 @@ template:
                                 type: Custom
                                 policySpec:
                                   payload: <+pipeline.stages.Terraform.spec.execution.steps.Terraform_Compliance.steps.Infracost.output.outputVariables.tfcost>
-                              timeout: 10m
+                              timeout: 30m
                               failurestrategies:                              
                                 - onFailure:                                  
                                     errors:                                    
@@ -217,7 +211,7 @@ template:
                           provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
                           configuration:
                             type: InheritFromPlan
-                        timeout: 10m
+                        timeout: 30m
                         failureStrategies: []
                         when:                          
                           stageStatus: Success                          
@@ -230,7 +224,7 @@ template:
                           provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
                           configuration:
                             type: InheritFromPlan
-                        timeout: 10m
+                        timeout: 30m
                         failureStrategies: []
                         when:                          
                           stageStatus: Success                          
@@ -244,7 +238,7 @@ template:
                       provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
                       delegateSelectors: []
                       skipRefreshCommand: false
-                    timeout: 10m
+                    timeout: 30m
             environment:
               environmentRef: <+input>
               deployToAll: false
@@ -271,14 +265,6 @@ template:
               type: Secret
               description: ""
               value: ${HARNESS_PLATFORM_API_KEY}
-            - name: GOOGLE_BACKEND_CREDENTIALS
-              type: Secret
-              description: ""
-              value: ${GOOGLE_BACKEND_CREDENTIALS}
-            - name: GOOGLE_CREDENTIALS
-              type: Secret
-              description: ""
-              value: ${GOOGLE_CREDENTIALS}
             - name: TERRAFORM_WORKSPACE
               type: String
               description: ""

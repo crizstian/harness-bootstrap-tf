@@ -58,7 +58,7 @@ module "bootstrap_harness_environments" {
   harness_platform_infrastructures = var.harness_platform_infrastructures
 }
 
-# Create Policies
+/* # Create Policies
 module "bootstrap_harness_policies" {
   source                       = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-policy?ref=refactor"
   suffix                       = random_string.suffix.id
@@ -67,4 +67,4 @@ module "bootstrap_harness_policies" {
   projects                     = module.bootstrap_harness_account.projects
   harness_platform_policies    = var.harness_platform_policies
   harness_platform_policy_sets = var.harness_platform_policy_sets
-}
+} */

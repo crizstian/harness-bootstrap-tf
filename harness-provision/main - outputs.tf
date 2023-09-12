@@ -10,3 +10,6 @@ output "templates" {
 output "environments" {
   value = module.bootstrap_harness_environments
 }
+/* output "policies" {
+  value = module.bootstrap_harness_policies
+} */
