@@ -14,9 +14,7 @@ ARG STATICCHECK_VERSION=2020.2.1
 RUN apk upgrade --no-cache && \
   apk add --no-cache --progress git build-base findutils make bat exa \
   coreutils wget curl aria2 bash ncurses binutils jq sudo ripgrep g++ \
-  vault fuse-dev libcap neofetch docker docker-compose openssh py3-pip yq && \
-  setcap cap_ipc_lock= /usr/sbin/vault && \
-  vault --version && \
+  fuse-dev libcap neofetch docker docker-compose openssh py3-pip yq && \
   sed -i '/root/s/ash/bash/g' /etc/passwd
 RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /bin -d ${GOLANGCI_LINT_VERSION}
 # Base Go tools needed for VS code Go extension
@@ -39,7 +37,7 @@ RUN GO111MODULE=on  go install github.com/terraform-linters/tflint@latest
 RUN GO111MODULE=on  go install github.com/zricethezav/gitleaks/v8@latest
 RUN rm -rf $GOPATH/pkg/* $GOPATH/src/* /root/.cache/go-build
 RUN go env -w GOPRIVATE=github.com/crizstian
-RUN pip install pre-commit
+# RUN pip install pre-commit
 
 # Download Terraform
 RUN git clone --depth=1 https://github.com/tfutils/tfenv.git ~/.tfenv && \ 
@@ -70,4 +68,4 @@ RUN gcloud components install gke-gcloud-auth-plugin --quiet
 
 WORKDIR /workspace
 
-RUN pre-commit install
+# RUN pre-commit install

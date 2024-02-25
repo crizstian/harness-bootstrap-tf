@@ -35,3 +35,29 @@ variable "harness_platform_policy_sets" {
   description = "Harness templates to be applied"
   default     = {}
 }
+variable "harness_platform_roles" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
+variable "harness_platform_users" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
+variable "harness_platform_service_accounts" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
+variable "harness_platform_usergroups" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
+
+variable "harness_platform_resource_groups" {
+  description = "Harness templates to be applied"
+  default     = {}
+}
+
+variable "harness_platform_role_assignments" {
+  description = "Harness templates to be applied"
+  default     = {}
+}

@@ -58,13 +58,81 @@ module "bootstrap_harness_environments" {
   harness_platform_infrastructures = var.harness_platform_infrastructures
 }
 
-/* # Create Policies
+# Create Policies
 module "bootstrap_harness_policies" {
+  source                    = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-policy?ref=refactor"
+  suffix                    = random_string.suffix.id
+  tags                      = local.common_tags
+  organizations             = module.bootstrap_harness_account.organizations
+  projects                  = module.bootstrap_harness_account.projects
+  harness_platform_policies = var.harness_platform_policies
+}
+
+module "bootstrap_harness_policy_sets" {
   source                       = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-policy?ref=refactor"
   suffix                       = random_string.suffix.id
   tags                         = local.common_tags
   organizations                = module.bootstrap_harness_account.organizations
   projects                     = module.bootstrap_harness_account.projects
-  harness_platform_policies    = var.harness_platform_policies
+  policies                     = module.bootstrap_harness_policies.policies
   harness_platform_policy_sets = var.harness_platform_policy_sets
-} */
+}
+
+module "bootstrap_harness_roles" {
+  source                 = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-rbac?ref=refactor"
+  suffix                 = random_string.suffix.id
+  tags                   = local.common_tags
+  organizations          = module.bootstrap_harness_account.organizations
+  projects               = module.bootstrap_harness_account.projects
+  harness_platform_roles = var.harness_platform_roles
+}
+
+module "bootstrap_harness_users" {
+  source                 = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-rbac?ref=refactor"
+  suffix                 = random_string.suffix.id
+  tags                   = local.common_tags
+  organizations          = module.bootstrap_harness_account.organizations
+  projects               = module.bootstrap_harness_account.projects
+  harness_platform_users = var.harness_platform_users
+}
+
+module "bootstrap_harness_usersgroups" {
+  source                      = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-rbac?ref=refactor"
+  suffix                      = random_string.suffix.id
+  tags                        = local.common_tags
+  organizations               = module.bootstrap_harness_account.organizations
+  projects                    = module.bootstrap_harness_account.projects
+  harness_platform_usergroups = var.harness_platform_usergroups
+}
+
+module "bootstrap_harness_service_accounts" {
+  source                            = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-rbac?ref=refactor"
+  suffix                            = random_string.suffix.id
+  tags                              = local.common_tags
+  organizations                     = module.bootstrap_harness_account.organizations
+  projects                          = module.bootstrap_harness_account.projects
+  harness_platform_service_accounts = var.harness_platform_service_accounts
+}
+
+module "bootstrap_harness_resource_groups" {
+  source                           = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-rbac?ref=refactor"
+  suffix                           = random_string.suffix.id
+  tags                             = local.common_tags
+  organizations                    = module.bootstrap_harness_account.organizations
+  projects                         = module.bootstrap_harness_account.projects
+  harness_platform_resource_groups = var.harness_platform_resource_groups
+}
+
+module "bootstrap_harness_role_assignments" {
+  source                            = "git::https://github.com/crizstian/harness-terraform-modules.git//harness-rbac?ref=refactor"
+  suffix                            = random_string.suffix.id
+  tags                              = local.common_tags
+  organizations                     = module.bootstrap_harness_account.organizations
+  projects                          = module.bootstrap_harness_account.projects
+  roles                             = module.bootstrap_harness_roles.roles
+  users                             = module.bootstrap_harness_users.users
+  usergroups                        = module.bootstrap_harness_usersgroups.usergroups
+  service_accounts                  = module.bootstrap_harness_service_accounts.service_accounts
+  resource_groups                   = module.bootstrap_harness_resource_groups.resource_groups
+  harness_platform_role_assignments = var.harness_platform_role_assignments
+}
