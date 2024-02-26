@@ -1,0 +1,285 @@
+template:
+  name: ${name}
+  identifier: ${identifier}
+  versionLabel: "${version}"
+  description: "${description}"
+  type: Pipeline
+  tags: {}
+  spec:
+    stages:
+      - stage:
+          name: Terraform
+          identifier: Terraform
+          description: ""
+          type: Deployment
+          spec:
+            deploymentType: CustomDeployment
+            customDeploymentRef:
+              templateRef: ${template-deployment.template_id}
+              versionLabel: "${template-deployment.template_version}"
+            service:
+              serviceRef: <+input>
+              serviceInputs: <+input>
+            execution:
+              steps:
+                - step:
+                    name: Fetch Instances
+                    identifier: fetchInstances
+                    type: FetchInstanceScript
+                    timeout: 30m
+                    spec: {}
+                - step:
+                    type: TerraformPlan
+                    name: Terraform Plan
+                    identifier: Terraform_Plan
+                    spec:
+                      provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
+                      configuration:
+                        command: Apply
+                        configFiles:
+                          store:
+                            spec:
+                              %{ if length(connectors) > 0 }
+                              connectorRef: ${connectors.GIT_CONNECTOR.id}
+                              %{ else }
+                              connectorRef: <+input>
+                              %{ endif }
+                              gitFetchType: Branch
+                              branch: <+stage.variables.TERRAFORM_WORKSPACE>
+                              folderPath: <+stage.variables.TERRAFORM_FOLDER>
+                              repoName: <+pipeline.variables.TERRAFORM_REPO>
+                            type: Github
+                          modulesource:                          
+                            useConnectorCredentials: true
+                        backendConfig:
+                          type: Inline
+                          spec:
+                            content: |-
+                              bucket = "<+stage.variables.GCS_BUCKET>"
+                              prefix = "<+stage.variables.GCS_PREFIX>"
+                        environmentVariables:
+                          - name: TF_VAR_harness_platform_account_id
+                            value: <+account.identifier>
+                            type: String
+                          - name: TF_VAR_harness_platform_api_key
+                            value: <+stage.variables.HARNESS_PLATFORM_API_KEY>
+                            type: String
+                          - name: HARNESS_ACCOUNT_ID
+                            value: <+account.identifier>
+                            type: String
+                          - name: HARNESS_PLATFORM_API_KEY
+                            value: <+stage.variables.HARNESS_PLATFORM_API_KEY>
+                            type: String
+                          - name: HARNESS_ENDPOINT
+                            value: https://app.harness.io/gateway
+                            type: String
+                        varFiles:
+                          - varFile:
+                              type: Remote
+                              identifier: tfvars
+                              spec:
+                                store:
+                                  type: Github
+                                  spec:
+                                    gitFetchType: Branch
+                                    repoName: <+pipeline.variables.TERRAFORM_REPO>
+                                    branch: <+stage.variables.TERRAFORM_WORKSPACE>
+                                    paths: <+input>
+                                    %{ if length(connectors) > 0 }
+                                    connectorRef: ${connectors.GIT_CONNECTOR.id}
+                                    %{ else }
+                                    connectorRef: <+input>
+                                    %{ endif }
+                        secretManagerRef: account.harnessSecretManager
+                        workspace: <+stage.variables.TERRAFORM_WORKSPACE>
+                        exportTerraformPlanJson: true
+                        skipRefreshCommand: false
+                    timeout: 30m
+                - stepGroup:
+                    name: Terraform Compliance
+                    identifier: Terraform_Compliance
+                    steps:
+                      - step:
+                          type: ShellScript
+                          name: Export Plan
+                          identifier: Export_Plan
+                          spec:
+                            shell: Bash
+                            onDelegate: true
+                            source:
+                              type: Inline
+                              spec:
+                                script: tfplan=$(cat <+pipeline.stages.Terraform.spec.execution.steps.Terraform_Plan.plan.jsonFilePath>)
+                            environmentVariables: []
+                            outputVariables:
+                              - name: tfplan
+                                type: String
+                                value: tfplan
+                          timeout: 30m
+                      - step:
+                          type: ShellScript
+                          name: Infracost
+                          identifier: Infracost
+                          spec:
+                            shell: Bash
+                            onDelegate: true
+                            source:
+                              type: Inline
+                              spec:
+                                script: |-
+                                  curl -s -X POST \
+                                       -H "x-api-key: ico-qtMwUTZL4ETEYWympOQG2kRGxRsqicCc" \
+                                       -F "ci-platform=harness" \
+                                       -F "format=json" \
+                                       -F "path=@<+pipeline.stages.Terraform.spec.execution.steps.Terraform_Plan.plan.jsonFilePath>" \
+                                       https://pricing.api.infracost.io/breakdown > infracost.json
+
+                                  cat infracost.json
+
+                                  tfcost=$(cat infracost.json)
+                            environmentVariables: []
+                            outputVariables:
+                              - name: tfcost
+                                type: String
+                                value: tfcost
+                          timeout: 30m
+                      - parallel:
+                          - step:
+                              type: Policy
+                              name: Terraform Compliance Check
+                              identifier: Terraform_Compliance_Check
+                              spec:
+                                policySets:
+                                  - account.Terraform_Compliance
+                                type: Custom
+                                policySpec:
+                                  payload: <+pipeline.stages.Terraform.spec.execution.steps.Terraform_Compliance.steps.Export_Plan.output.outputVariables.tfplan>
+                              timeout: 30m
+                              failurestrategies:                              
+                                - onFailure:                                  
+                                    errors:                                    
+                                      - AllErrors                                  
+                                    action:                                    
+                                      type: ManualIntervention                                    
+                                      spec:                                      
+                                        timeout: 1d                                      
+                                        onTimeout:                                        
+                                          action:                                          
+                                            type: StageRollback
+                          - step:
+                              type: Policy
+                              name: Terraform Budget Check
+                              identifier: Terraform_Budget_Check
+                              spec:
+                                policySets:
+                                  - account.Terraform_Budget
+                                type: Custom
+                                policySpec:
+                                  payload: <+pipeline.stages.Terraform.spec.execution.steps.Terraform_Compliance.steps.Infracost.output.outputVariables.tfcost>
+                              timeout: 30m
+                              failurestrategies:                              
+                                - onFailure:                                  
+                                    errors:                                    
+                                      - AllErrors                                  
+                                    action:                                    
+                                      type: ManualIntervention                                    
+                                      spec:                                      
+                                        timeout: 1d                                      
+                                        onTimeout:                                        
+                                          action:                                          
+                                            type: StageRollback
+                - step:
+                    type: HarnessApproval
+                    name: Approve
+                    identifier: Approve
+                    spec:
+                      approvalMessage: Please review the following information and approve the pipeline progression
+                      includePipelineExecutionHistory: true
+                      approvers:
+                        userGroups:
+                          - account._account_all_users
+                        minimumCount: 1
+                        disallowPipelineExecutor: false
+                      approverInputs: []
+                    timeout: 1d
+                - parallel:
+                    - step:
+                        type: TerraformApply
+                        name: Terraform Apply
+                        identifier: Terraform_Apply
+                        spec:
+                          provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
+                          configuration:
+                            type: InheritFromPlan
+                        timeout: 30m
+                        failureStrategies: []
+                        when:                          
+                          stageStatus: Success                          
+                          condition: <+stage.variables.TERRAFORM_ACTION> == "apply"
+                    - step:
+                        type: TerraformDestroy
+                        name: Terraform Destroy
+                        identifier: Terraform_Destroy
+                        spec:
+                          provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
+                          configuration:
+                            type: InheritFromPlan
+                        timeout: 30m
+                        failureStrategies: []
+                        when:                          
+                          stageStatus: Success                          
+                          condition: <+stage.variables.TERRAFORM_ACTION> == "destroy"
+              rollbackSteps:
+                - step:
+                    type: TerraformRollback
+                    name: Terraform Rollback
+                    identifier: Terraform_Rollback
+                    spec:
+                      provisionerIdentifier: <+stage.variables.TERRAFORM_WORKSPACE>
+                      delegateSelectors: []
+                      skipRefreshCommand: false
+                    timeout: 30m
+            environment:
+              environmentRef: <+input>
+              deployToAll: false
+              environmentInputs: <+input>
+              serviceOverrideInputs: <+input>
+              infrastructureDefinitions: <+input>
+          tags: {}
+          failureStrategies:
+            - onFailure:
+                errors:
+                  - AllErrors
+                action:
+                  type: StageRollback
+          variables:
+            - name: GCS_BUCKET
+              type: String
+              description: ""
+              value: <+input>
+            - name: GCS_PREFIX
+              type: String
+              description: ""
+              value: <+input>
+            - name: HARNESS_PLATFORM_API_KEY
+              type: Secret
+              description: ""
+              value: ${HARNESS_PLATFORM_API_KEY}
+            - name: TERRAFORM_WORKSPACE
+              type: String
+              description: ""
+              value: <+input>
+            - name: TERRAFORM_ACTION
+              type: String
+              description: ""
+              value: <+input>.allowedValues(apply,destroy)
+            - name: TERRAFORM_FOLDER
+              type: String
+              description: ""
+              value: <+input>
+    variables:      
+      - name: TERRAFORM_REPO        
+        type: String        
+        description: ""        
+        value: <+input>
+    delegateSelectors: <+input>

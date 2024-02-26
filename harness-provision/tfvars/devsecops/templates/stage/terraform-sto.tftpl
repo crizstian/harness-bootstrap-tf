@@ -1,0 +1,247 @@
+template:
+  name: ${name}
+  identifier: "${identifier}"
+  versionLabel: "${version}"
+  type: Stage
+  tags: {}
+  spec:
+    type: SecurityTests
+    spec:
+      cloneCodebase: true
+      infrastructure:
+        type: KubernetesDirect
+        spec:
+          connectorRef: <+stage.variables.k8s_connector_ref>
+          namespace: default
+          automountServiceAccountToken: true
+          nodeSelector: {}
+          os: Linux
+      execution:
+        steps:
+          - stepGroup:
+              name: Terraform Scan
+              identifier: Terraform_Scan
+              steps:
+                - parallel:
+                    - step:
+                        type: Run
+                        name: AquaSec
+                        identifier: aquasecurity_tfsec
+                        spec:
+                          connectorRef: <+stage.variables.docker_connector_ref>
+                          image: aquasec/tfsec-alpine
+                          shell: Sh
+                          command: |-
+                            ls -la
+                            tfsec --out /shared/customer_artifacts/tfsecout /harness
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - AllErrors
+                              action:
+                                type: Ignore
+                    - step:
+                        type: Run
+                        name: Checkov
+                        identifier: Checkov
+                        spec:
+                          connectorRef: <+stage.variables.docker_connector_ref>
+                          image: bridgecrew/checkov
+                          shell: Sh
+                          command: |
+                            checkov --output json --compact --quiet --output-file-path /shared/customer_artifacts/checkov -d .
+                          privileged: false
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - AllErrors
+                              action:
+                                type: Ignore
+                    - step:
+                        type: Run
+                        name: Terrascan
+                        identifier: Terrascan
+                        spec:
+                          connectorRef: <+stage.variables.docker_connector_ref>
+                          image: tenable/terrascan
+                          shell: Sh
+                          command: terrascan scan -o json > /shared/customer_artifacts/tfscan.json
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - AllErrors
+                              action:
+                                type: Ignore
+          - stepGroup:
+              name: STO Process
+              identifier: STO_Process
+              steps:
+                - parallel:
+                    - step:
+                        type: Run
+                        name: Checkov Ingest
+                        identifier: Checkov_Ingest
+                        spec:
+                          connectorRef: <+stage.variables.docker_connector_ref>
+                          image: python:bullseye
+                          shell: Python
+                          command: |
+                            import json
+
+                            elements = []
+                            i = 0
+                            with open('/shared/customer_artifacts/checkov/results_json.json') as data_file:    
+                                info = json.load(data_file)
+                                for data in info:
+                                    for v in data["results"]["failed_checks"]:
+                                        i+=1
+                                        element = {}
+                                        element["id"]=v["check_id"]
+                                        element["bc_id"]=v["bc_check_id"]
+                                        element["issueName"]=v["check_name"]
+                                        element["issueDescription"]=v["description"]
+                                        element["fileName"]=v["file_path"]
+                                        element["remediationSteps"]=v["check_class"]
+                                        element["risk"]=v["guideline"]
+                                        element["status"]=v["check_result"]["result"]
+                                        element["cvss"]=v["check_id"]
+                                        element["issueType"]=data["check_type"]
+                                        element["lineNumber"]=v["file_line_range"]
+                                        element["product"]=v["resource"]
+                                        element["scanTool"]="checkov"
+
+                                        element["severity"]=5
+                                        element["type"]=data["check_type"]
+                                        elements.append(element)
+
+                                results = {}
+                                results["meta"] = {}
+                                results["meta"]["key"]=[  
+                                            "issueName",  
+                                            "fileName"  
+                                        ]
+                                results["meta"]["author"]="Checkov"
+                                results["issues"]=elements
+
+                            with open('/shared/customer_artifacts/checkov.json', 'w') as f:
+                                json.dump(results, f, indent=2)
+                                print("Nuevo resporte de lint generado")
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - Timeout
+                              action:
+                                type: Ignore
+                        timeout: 5m
+                    - step:
+                        type: Run
+                        name: Terrascan Ingest
+                        identifier: Terrascan_Ingest
+                        spec:
+                          connectorRef: <+stage.variables.docker_connector_ref>
+                          image: python:bullseye
+                          shell: Python
+                          command: |
+                            import json
+
+                            elements = []
+                            i = 0
+                            with open('/shared/customer_artifacts/tfscan.json') as data_file:    
+                                data = json.load(data_file)
+                                for v in data["results"]["violations"]:
+                                    i+=1
+                                    element = {}
+                                    element["id"]=v["rule_id"]
+                                    # element["bc_id"]=v["bc_check_id"]
+                                    element["issueName"]=v["rule_name"]
+                                    element["issueDescription"]=v["description"]
+                                    element["fileName"]=v["file"]
+                                    element["remediationSteps"]=v["category"]
+                                    element["risk"]=v["severity"]
+                                    element["status"]=v["severity"]
+                                    element["cvss"]=v["rule_id"]
+                                    element["issueType"]=v["resource_name"]
+                                    element["lineNumber"]=v["line"]
+                                    element["product"]=v["resource_type"]
+                                    element["scanTool"]="terrascan"
+
+                                    element["severity"]=5
+                                    element["type"]="CKV"
+                                    elements.append(element)
+
+                            results = {}
+                            results["meta"] = {}
+                            results["meta"]["key"]=[  
+                                        "issueName",  
+                                        "fileName"  
+                                    ]
+                            results["meta"]["author"]="Terrascan"
+                            results["issues"]=elements
+
+                            with open('/shared/customer_artifacts/scan.json', 'w') as f:
+                                json.dump(results, f, indent=2)
+                                print("Nuevo resporte de lint generado")
+                        timeout: 5m
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - Timeout
+                              action:
+                                type: Ignore
+                - parallel:
+                    - step:
+                        type: Security
+                        name: STO TF Checkov
+                        identifier: STO_TF_Checkov
+                        spec:
+                          privileged: true
+                          settings:
+                            policy_type: ingestionOnly
+                            scan_type: repository
+                            product_name: external
+                            product_config_name: default
+                            manual_upload_filename: checkov.json
+                            customer_artifacts_path: /shared/customer_artifacts
+                            repository_project: <+codebase.repoUrl>
+                            repository_branch: <+codebase.branch>
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - AllErrors
+                              action:
+                                type: Ignore
+                    - step:
+                        type: Security
+                        name: STO TF Terrascan
+                        identifier: STO_TF_Terrascan
+                        spec:
+                          privileged: true
+                          settings:
+                            policy_type: ingestionOnly
+                            scan_type: repository
+                            product_name: external
+                            product_config_name: default
+                            manual_upload_filename: scan.json
+                            customer_artifacts_path: /shared/customer_artifacts
+                            repository_project: <+codebase.repoUrl>
+                            repository_branch: <+codebase.branch>
+                        failureStrategies:
+                          - onFailure:
+                              errors:
+                                - AllErrors
+                              action:
+                                type: Ignore
+      sharedPaths:
+        - /var/run
+        - /shared/customer_artifacts
+    when:
+      pipelineStatus: Success
+    variables:
+      - name: k8s_connector_ref
+        type: String
+        description: ""
+        value: <+input>
+      - name: docker_connector_ref
+        type: String
+        description: ""
+        value: <+input>

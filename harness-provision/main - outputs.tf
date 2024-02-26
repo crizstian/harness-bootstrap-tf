@@ -1,11 +1,22 @@
-# Outputs
 output "harness" {
-  value = merge(
-    length(keys(module.bootstrap_harness_account.organization)) > 0 ? { organizations = merge(module.bootstrap_harness_account.organization, var.harness_platform_organizations[var.organization_prefix]) } : {},
-    length(keys(module.bootstrap_harness_delegates.manifests)) > 0 ? { delegates = module.bootstrap_harness_delegates.manifests } : {},
-    length(keys(module.bootstrap_harness_connectors.connectors)) > 0 ? { connectors = module.bootstrap_harness_connectors.connectors } : {},
-    length(keys(module.bootstrap_harness_pipelines.pipelines)) > 0 ? { pipelines = module.bootstrap_harness_pipelines.pipelines } : {},
-    length(keys(module.bootstrap_harness_templates.templates)) > 0 ? { templates = module.bootstrap_harness_templates.templates } : {},
-    length(keys(module.bootstrap_harness_policies.policies)) > 0 ? { policies = module.bootstrap_harness_policies.policies } : {},
-  )
+  value = module.bootstrap_harness_account
 }
+output "connectors" {
+  value = module.bootstrap_harness_connectors
+}
+output "templates" {
+  value = module.bootstrap_harness_templates
+}
+output "environments" {
+  value = module.bootstrap_harness_environments
+}
+/* output "policies" {
+  value = module.bootstrap_harness_policies
+} */
+
+
+output "roles" { value = module.bootstrap_harness_roles.roles }
+output "users" { value = module.bootstrap_harness_users.users }
+output "usergroups" { value = module.bootstrap_harness_usersgroups.usergroups }
+output "service_accounts" { value = module.bootstrap_harness_service_accounts.service_accounts }
+output "resource_groups" { value = module.bootstrap_harness_resource_groups.resource_groups }
